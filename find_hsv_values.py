@@ -1,21 +1,31 @@
 import cv2
 import numpy as np
+import configparser
+
+from utils import to_int
 
 
-frameWidth = 640
-frameHeight = 480
+config = configparser.ConfigParser()
+configFilePath = "/home/shantanu/stuff/projects/virtual-paint/config.ini"
+config.read(configFilePath)
+
+# Read frame width and frame height from config file
+frameWidth = to_int(config['video']['frameWidth'])
+frameHeight = to_int(config['video']['frameWidth'])
+brightness = to_int(config['video']['brightness'])
+
 cap = cv2.VideoCapture(0)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
-cap.set(10,150)
+cap.set(10, brightness)
 
-
+ 
 def caller(x):
     pass
 
 
 cv2.namedWindow("HSV Tracker")
-cv2.resizeWindow("HSV Tracker", 640, 240) # Resize TrackBars window having size 640 x 240
+cv2.resizeWindow("HSV Tracker", to_int(config['tracker']['width']), to_int(config['tracker']['height'])) # Resize TrackBars window having size 640 x 240
 
 # Create trackbars
 cv2.createTrackbar("Hue Min", "HSV Tracker", 0, 179, caller)
@@ -26,12 +36,12 @@ cv2.createTrackbar("Value Min", "HSV Tracker", 0, 255, caller)
 cv2.createTrackbar("Value Max", "HSV Tracker", 255, 255, caller)
 
 
-# Now to get continous value, we need it to put it into loop
+# Now to get continous value, put it into loop
 while True:
     ret, img = cap.read()
     # As in HSV, it is easier to represent a color than in BGR color-space
     imgHSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
-    # Now we will read trackbars value so we can apply it to image using getTrackbarPostiton system
+    # Now read trackbars value so it can be applied to image using getTrackbarPos system
     h_min = cv2.getTrackbarPos("Hue Min", "HSV Tracker")
     h_max = cv2.getTrackbarPos("Hue Max", "HSV Tracker")
     s_min = cv2.getTrackbarPos("Sat Min", "HSV Tracker")
@@ -39,7 +49,7 @@ while True:
     v_min = cv2.getTrackbarPos("Value Min", "HSV Tracker")
     v_max = cv2.getTrackbarPos("Value Max", "HSV Tracker")
 
-    # Now we will use these values to filter out image
+    # Now use these values to filter out image
     lower_limit = np.array([h_min, s_min, v_min])
     upper_limit = np.array([h_max,s_max,v_max])
     # Then to filter out
